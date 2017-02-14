@@ -29,7 +29,7 @@
 (defn handle-keydown
   [e]
   (let [keycode (.-keyCode e)]
-    (if (and (>= keycode 37) (<= keycode 40)) ; bound the keycodes
+    (if (and (>= keycode left) (<= keycode down)) ; bound the keycodes
       (rf/dispatch [:set-direction (.-keyCode e)]))))
 
 (defn increment-points
