@@ -37,6 +37,7 @@
   []
   [:div
    [:h1 "A ClojureScript snake-game using reframe and reagent"]
+   [:h2 "Made by ddrmanxbxfr as a clojurescript learning project"]
    [:h3
      "Score : "
      (with-out-str (pprint  (:score @re-frame.db/app-db)))
@@ -44,8 +45,8 @@
        " -- Running"
        " -- Game over ! Refresh to restart")]
    (render-rows @(rf/subscribe [:board-size]))
-   [:pre (with-out-str (pprint (:position (:snake @re-frame.db/app-db))))]
-   [:pre (with-out-str (pprint @(rf/subscribe [:snake-parts-pos])))]
+   ;[:pre (with-out-str (pprint (:position (:snake @re-frame.db/app-db))))]
+   ;[:pre (with-out-str (pprint @(rf/subscribe [:snake-parts-pos])))]
    ])
 
 (defn ^:export run

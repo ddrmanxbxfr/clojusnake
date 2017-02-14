@@ -33,7 +33,6 @@
          [38] (rf/dispatch [:set-direction-up])
          [39] (rf/dispatch [:set-direction-right])
          [40] (rf/dispatch [:set-direction-down])))
-         ;:else (println "no matching key")))
 
 (defn increment-points
   [db]
