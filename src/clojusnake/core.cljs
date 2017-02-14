@@ -1,8 +1,8 @@
-(ns snake-game.core
+(ns clojusnake.core
   (:require [reagent.core :as reagent :refer [atom]]
             [cljs.core.match :refer-macros [match]]
-            [snake-game.store :as store]
-            [snake-game.utils :as utils]
+            [clojusnake.store :as store]
+            [clojusnake.utils :as utils]
             [cljs.pprint :refer [pprint]]
             [re-frame.core :as rf]))
 

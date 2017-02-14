@@ -1,4 +1,4 @@
-(ns snake-game.utils)
+(ns clojusnake.utils)
 
 (defn in? 
   "true if coll contains elm"

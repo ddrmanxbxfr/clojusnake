@@ -1,8 +1,8 @@
-(defproject snake-game "0.1.0-SNAPSHOT"
-  :description "FIXME: write this!"
+(defproject clojusnake "0.1.0-SNAPSHOT"
+  :description "A simple snake game showcasing clojurescript / reframe and re-agent"
   :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :license {:name "GNU GPL v3"
+            :url "https://www.gnu.org/licenses/gpl-3.0.en.html"}
 
   :min-lein-version "2.7.1"
 
@@ -28,14 +28,14 @@
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
                 ;; into your build
-                :figwheel {:on-jsload "snake-game.core/on-js-reload"
+                :figwheel {:on-jsload "clojusnake.core/on-js-reload"
                            ;; :open-urls will pop open your application
                            ;; in the default browser once Figwheel has
                            ;; started and complied your application.
                            ;; Comment this out once it no longer serves you.
                            :open-urls ["http://localhost:3449/index.html"]}
 
-                :compiler {:main snake-game.core
+                :compiler {:main clojusnake.core
                            :asset-path "js/compiled/out"
                            :output-to "resources/public/js/compiled/snake_game.js"
                            :output-dir "resources/public/js/compiled/out"
@@ -49,7 +49,7 @@
                {:id "min"
                 :source-paths ["src"]
                 :compiler {:output-to "resources/public/js/compiled/snake_game.js"
-                           :main snake-game.core
+                           :main clojusnake.core
                            :optimizations :advanced
                            :pretty-print false}}]}
 

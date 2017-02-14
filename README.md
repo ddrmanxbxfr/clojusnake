@@ -1,6 +1,6 @@
-# snake-game
+# clojusnake
 
-A simple snake game using reagent, re-frame and opengameart assets.
+A simple snake game showcasing clojurescript, reagent, re-frame and opengameart assets.
 
 ## Setup
 
