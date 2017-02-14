@@ -16,7 +16,7 @@
 (defn start-tick-loop
   []
   (println "Starting game loop at 50 ms per tick")
-  (js/setInterval #(rf/dispatch [:move-direction]) 50))
+  (js/setInterval #(rf/dispatch [:move-direction]) 75))
 
 (defn random-point
   [game-board-size points-on-board]
@@ -27,13 +27,13 @@
 
 (defn handle-keydown
   [e]
-  ; Not sure why def are not working on pattern match here.
+  ; FIXME: Not sure why def are not working on pattern match here.
   (match [(.-keyCode e)]
          [37] (rf/dispatch [:set-direction-left])
          [38] (rf/dispatch [:set-direction-up])
          [39] (rf/dispatch [:set-direction-right])
-         [40] (rf/dispatch [:set-direction-down])
-         :else (println "no matching key")))
+         [40] (rf/dispatch [:set-direction-down])))
+         ;:else (println "no matching key")))
 
 (defn increment-points
   [db]
