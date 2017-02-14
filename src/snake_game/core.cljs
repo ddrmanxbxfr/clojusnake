@@ -29,7 +29,7 @@
       ]))])
 
 (defn render-rows [board-size]
-  [:div
+  [:div { :id "game" }
    (doall (for [pos_x (range (first board-size))]
      (single-row pos_x (last board-size))))])
 
