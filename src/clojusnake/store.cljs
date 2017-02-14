@@ -8,6 +8,7 @@
 (def app-db  (reagent/atom {}))
 (def snake { :position [0,0], :points [] })
 (def board-size [10 20])
+
 (def left 37)
 (def right 39)
 (def up 38)
@@ -27,12 +28,9 @@
 
 (defn handle-keydown
   [e]
-  ; FIXME: Not sure why def are not working on pattern match here.
-  (match [(.-keyCode e)]
-         [37] (rf/dispatch [:set-direction-left])
-         [38] (rf/dispatch [:set-direction-up])
-         [39] (rf/dispatch [:set-direction-right])
-         [40] (rf/dispatch [:set-direction-down])))
+  (let [keycode (.-keyCode e)]
+    (if (and (>= keycode 37) (<= keycode 40)) ; bound the keycodes
+      (rf/dispatch [:set-direction (.-keyCode e)]))))
 
 (defn increment-points
   [db]
@@ -115,24 +113,9 @@
         db)))
 
   (rf/reg-event-db
-    :set-direction-down
-    (fn [db _]
-      (assoc db :direction down)))
-
-  (rf/reg-event-db
-      :set-direction-left
-      (fn [db _]
-        (assoc db :direction left)))
-
-  (rf/reg-event-db
-      :set-direction-right
-      (fn [db _]
-        (assoc db :direction right)))
-
-  (rf/reg-event-db
-    :set-direction-up
-    (fn [db _]
-      (assoc db :direction up)))
+    :set-direction
+    (fn [db event]
+      (assoc db :direction (val event))))
 
   (rf/reg-sub
     :board-size
