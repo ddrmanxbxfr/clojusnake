@@ -7,7 +7,7 @@
 
 (def app-db  (reagent/atom {}))
 (def snake { :position [0,0], :points [] })
-(def board-size [5 5])
+(def board-size [10 20])
 (def left 37)
 (def right 39)
 (def up 38)
@@ -15,8 +15,8 @@
 
 (defn start-tick-loop
   []
-  (println "Starting game loop at 100 ms per tick")
-  (js/setInterval #(rf/dispatch [:move-direction]) 100))
+  (println "Starting game loop at 50 ms per tick")
+  (js/setInterval #(rf/dispatch [:move-direction]) 50))
 
 (defn random-point
   [game-board-size points-on-board]
@@ -45,12 +45,13 @@
 
 (defn collision-with-item
   [db]
-  (if (= (:position (:snake db)) (:score-point-pos db))
-    (let [snake (:snake db)]
+  (if (utils/in? (:points (:snake db)) (:position (:snake db)))
+    (assoc db :game-running? false)
+    (if (= (:position (:snake db)) (:score-point-pos db))
       (merge db { :score (+ (:score db) 1)
                   :score-point-pos (random-point (:board-size db) (:points (:snake db)))
-                  :snake (merge (:snake db) { :points (increment-points db) }) }))
-    db))
+                  :snake (merge (:snake db) { :points (increment-points db) }) })
+      db)))
 
 (defn snake-x
   [db]
@@ -65,28 +66,28 @@
   (if (< (snake-x db) (- (first (:board-size db)) 1))
     (assoc db :snake { :position [(+ 1 (snake-x db)), (snake-y db)]
                        :points (:points (:snake db)) })
-    (merge db { :game-running? false })))
+    (assoc db :game-running? false)))
 
 (defn move-up
   [db]
   (if (> (snake-x db) 0)
     (assoc db :snake { :position [(- (snake-x db) 1), (snake-y db)]
                              :points (:points (:snake db)) })
-    (merge db { :game-running? false })))
+    (assoc db :game-running? false)))
 
 (defn move-left
   [db]
     (if (> (snake-y db) 0)
       (assoc db :snake { :position [(snake-x db), (- (snake-y db) 1)]
                                            :points (:points (:snake db)) })
-      (merge db { :game-running? false })))
+      (assoc db :game-running? false)))
 
 (defn move-right
   [db]
   (if (< (snake-y db) (- (last (:board-size db)) 1))
     (assoc db :snake { :position [(snake-x db), (+ 1 (snake-y db))]
                        :points (:points (:snake db))})
-    (merge db { :game-running? false })))
+    (assoc db :game-running? false)))
 
 (defn prepare
   []
@@ -111,7 +112,8 @@
               [38] (move-up db)
               [39] (move-right db)
               [40] (move-down db)
-              :else db))))))
+              :else db)))
+        db)))
 
   (rf/reg-event-db
     :set-direction-down
@@ -133,7 +135,6 @@
     (fn [db _]
       (assoc db :direction up)))
 
-; TODO: Define behavior on wall hit
   (rf/reg-sub
     :board-size
     (fn [db _]
