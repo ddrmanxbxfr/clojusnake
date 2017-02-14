@@ -1,12 +1,13 @@
 (ns snake-game.store
   (:require [reagent.core :as reagent :refer [atom]]
             [cljs.pprint :refer [pprint]]
+            [snake-game.utils :as utils]
             [cljs.core.match :refer-macros [match]]
             [re-frame.core :as rf]))
 
 (def app-db  (reagent/atom {}))
 (def snake { :position [0,0], :points [] })
-
+(def board-size [5 5])
 (def left 37)
 (def right 39)
 (def up 38)
@@ -14,12 +15,15 @@
 
 (defn start-tick-loop
   []
-  (println "Starting game loop at 350 ms per tick")
-  (js/setInterval #(rf/dispatch [:move-direction]) 350))
+  (println "Starting game loop at 100 ms per tick")
+  (js/setInterval #(rf/dispatch [:move-direction]) 100))
 
 (defn random-point
   [game-board-size points-on-board]
-  [(rand-int (- (first game-board-size) 1)) (rand-int (- (last game-board-size) 1))])
+  (let [rng-position [(rand-int (- (first game-board-size) 1)) (rand-int (- (last game-board-size) 1))]]
+    (if (utils/in? points-on-board rng-position)
+      (random-point game-board-size points-on-board)
+      rng-position)))
 
 (defn handle-keydown
   [e]
@@ -56,14 +60,42 @@
   [db]
   (last (:position (:snake db))))
 
+(defn move-down
+  [db]
+  (if (< (snake-x db) (- (first (:board-size db)) 1))
+    (assoc db :snake { :position [(+ 1 (snake-x db)), (snake-y db)]
+                       :points (:points (:snake db)) })
+    (merge db { :game-running? false })))
+
+(defn move-up
+  [db]
+  (if (> (snake-x db) 0)
+    (assoc db :snake { :position [(- (snake-x db) 1), (snake-y db)]
+                             :points (:points (:snake db)) })
+    (merge db { :game-running? false })))
+
+(defn move-left
+  [db]
+    (if (> (snake-y db) 0)
+      (assoc db :snake { :position [(snake-x db), (- (snake-y db) 1)]
+                                           :points (:points (:snake db)) })
+      (merge db { :game-running? false })))
+
+(defn move-right
+  [db]
+  (if (< (snake-y db) (- (last (:board-size db)) 1))
+    (assoc db :snake { :position [(snake-x db), (+ 1 (snake-y db))]
+                       :points (:points (:snake db))})
+    (merge db { :game-running? false })))
+
 (defn prepare
   []
   (rf/reg-event-db              ;; sets up initial application state
     :initialize
     (fn [_ _]
       {:score 0
-       :board-size [5,10]
-       :score-point-pos (random-point [5,10] [])
+       :board-size board-size
+       :score-point-pos (random-point board-size [])
        :snake snake
        :direction right
        :game-running? true}))
@@ -71,13 +103,15 @@
   (rf/reg-event-db
     :move-direction
     (fn [db _]
-      (match [(:direction db)]
-        [37] (rf/dispatch [:move-left])
-        [38] (rf/dispatch [:move-up])
-        [39] (rf/dispatch [:move-right])
-        [40] (rf/dispatch [:move-down])
-        :else (println "no matching direction"))
-      db))
+      (if (:game-running? db)
+        (cycle-points 
+          (collision-with-item 
+            (match [(:direction db)]
+              [37] (move-left db)
+              [38] (move-up db)
+              [39] (move-right db)
+              [40] (move-down db)
+              :else db))))))
 
   (rf/reg-event-db
     :set-direction-down
@@ -100,51 +134,11 @@
       (assoc db :direction up)))
 
 ; TODO: Define behavior on wall hit
-  (rf/reg-event-db
-    :move-down
-    (fn [db _]
-      (if (< (snake-x db) (- (first (:board-size db)) 1))
-        (cycle-points 
-          (collision-with-item 
-            (assoc db :snake { :position [(+ 1 (snake-x db)), (snake-y db)]
-                               :points (:points (:snake db)) })))
-        db)))
-
-  (rf/reg-event-db
-    :move-up
-    (fn [db _]
-      (if (> (snake-x db) 0)
-        (cycle-points 
-          (collision-with-item 
-            (assoc db :snake { :position [(- (snake-x db) 1), (snake-y db)]
-                               :points (:points (:snake db)) })))
-        db)))
-
-  (rf/reg-event-db
-    :move-left
-    (fn [db _]
-      (if (> (snake-y db) 0)
-        (cycle-points 
-          (collision-with-item 
-            (assoc db :snake { :position [(snake-x db), (- (snake-y db) 1)]
-                                             :points (:points (:snake db)) })))
-        db)))
-
-  (rf/reg-event-db
-    :move-right
-    (fn [db _]
-      (if (< (snake-y db) (- (last (:board-size db)) 1))
-        (cycle-points 
-          (collision-with-item 
-            (assoc db :snake { :position [(snake-x db), (+ 1 (snake-y db))]
-                                             :points (:points (:snake db))})))
-        db)))
-
   (rf/reg-sub
     :board-size
     (fn [db _]
       (:board-size db)))
-  
+
   (rf/reg-sub
     :snake
     (fn [db _]

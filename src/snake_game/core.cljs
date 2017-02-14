@@ -11,7 +11,7 @@
 (println "Reloading the app !")
 
 (def cell-style {:style {:display "table-cell" :position "relative"}})
-(def base-tile-style {:display "block" :height 75 :width 75 })
+(def base-tile-style {:display "block" :height 50 :width 50 })
 (def background-tile-style (merge base-tile-style {:position "relative" :z-index -1}))
 (def worm-tile-style (merge base-tile-style {:position "absolute" :z-index 1 :top 0 :left 0}))
 
@@ -25,7 +25,7 @@
        (if (= @(rf/subscribe [:snake-pos]) [pos_x, pos_y])
          [:img {:style worm-tile-style :src "snake_start.png" }])
        (if (utils/in? @(rf/subscribe [:snake-parts-pos]) [pos_x, pos_y])
-         [:img {:style worm-tile-style :src "snake_start.png" }])
+         [:img {:style worm-tile-style :src "snake_middle.png" }])
       ]))])
 
 (defn render-rows [board-size]
@@ -37,7 +37,12 @@
   []
   [:div
    [:h1 "A ClojureScript snake-game using reframe and reagent"]
-   [:h3 "Score : " (with-out-str (pprint  (:score @re-frame.db/app-db)))]
+   [:h3
+     "Score : "
+     (with-out-str (pprint  (:score @re-frame.db/app-db)))
+     (if (:game-running? @re-frame.db/app-db)
+       " -- Running"
+       " -- Game over ! Refresh to restart")]
    (render-rows @(rf/subscribe [:board-size]))
    [:pre (with-out-str (pprint (:position (:snake @re-frame.db/app-db))))]
    [:pre (with-out-str (pprint @(rf/subscribe [:snake-parts-pos])))]
