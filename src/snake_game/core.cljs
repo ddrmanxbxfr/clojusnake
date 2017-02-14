@@ -2,6 +2,7 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [cljs.core.match :refer-macros [match]]
             [snake-game.store :as store]
+            [snake-game.utils :as utils]
             [cljs.pprint :refer [pprint]]
             [re-frame.core :as rf]))
 
@@ -23,6 +24,8 @@
          [:img {:style worm-tile-style :src "apple.png" }])
        (if (= @(rf/subscribe [:snake-pos]) [pos_x, pos_y])
          [:img {:style worm-tile-style :src "snake_start.png" }])
+       (if (utils/in? @(rf/subscribe [:snake-parts-pos]) [pos_x, pos_y])
+         [:img {:style worm-tile-style :src "snake_start.png" }])
       ]))])
 
 (defn render-rows [board-size]
@@ -34,8 +37,10 @@
   []
   [:div
    [:h1 "A ClojureScript snake-game using reframe and reagent"]
+   [:h3 "Score : " (with-out-str (pprint  (:score @re-frame.db/app-db)))]
    (render-rows @(rf/subscribe [:board-size]))
    [:pre (with-out-str (pprint (:position (:snake @re-frame.db/app-db))))]
+   [:pre (with-out-str (pprint @(rf/subscribe [:snake-parts-pos])))]
    ])
 
 (defn ^:export run

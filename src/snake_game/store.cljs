@@ -5,7 +5,7 @@
             [re-frame.core :as rf]))
 
 (def app-db  (reagent/atom {}))
-(def snake { :position [0,0], :points [[1,0], [2,0]] })
+(def snake { :position [0,0], :points [] })
 
 (def left 37)
 (def right 39)
@@ -18,7 +18,7 @@
   (js/setInterval #(rf/dispatch [:move-direction]) 350))
 
 (defn random-point
-  [game-board-size]
+  [game-board-size points-on-board]
   [(rand-int (- (first game-board-size) 1)) (rand-int (- (last game-board-size) 1))])
 
 (defn handle-keydown
@@ -31,6 +31,23 @@
          [40] (rf/dispatch [:set-direction-down])
          :else (println "no matching key")))
 
+(defn increment-points
+  [db]
+  (conj (:points (:snake db)) (:position (:snake db))))
+
+(defn cycle-points
+  [db]
+  (merge db { :snake (merge (:snake db) { :points (conj (drop-last (:points (:snake db))) (:position (:snake db))) })}))
+
+(defn collision-with-item
+  [db]
+  (if (= (:position (:snake db)) (:score-point-pos db))
+    (let [snake (:snake db)]
+      (merge db { :score (+ (:score db) 1)
+                  :score-point-pos (random-point (:board-size db) (:points (:snake db)))
+                  :snake (merge (:snake db) { :points (increment-points db) }) }))
+    db))
+
 (defn snake-x
   [db]
   (first (:position (:snake db))))
@@ -39,17 +56,14 @@
   [db]
   (last (:position (:snake db))))
 
-(defn increment-points
-  [db]
-  (conj (:points (:snake db)) (:position (:snake db))))
-
 (defn prepare
   []
   (rf/reg-event-db              ;; sets up initial application state
     :initialize
     (fn [_ _]
-      {:board-size [5,10]
-       :score-point-pos (random-point [5,10])
+      {:score 0
+       :board-size [5,10]
+       :score-point-pos (random-point [5,10] [])
        :snake snake
        :direction right
        :game-running? true}))
@@ -90,29 +104,40 @@
     :move-down
     (fn [db _]
       (if (< (snake-x db) (- (first (:board-size db)) 1))
-        (assoc db :snake { :position [(+ 1 (snake-x db)), (snake-y db)] :points db })
+        (cycle-points 
+          (collision-with-item 
+            (assoc db :snake { :position [(+ 1 (snake-x db)), (snake-y db)]
+                               :points (:points (:snake db)) })))
         db)))
 
   (rf/reg-event-db
     :move-up
     (fn [db _]
       (if (> (snake-x db) 0)
-        (assoc db :snake { :position [(- (snake-x db) 1), (snake-y db)] :points db })
+        (cycle-points 
+          (collision-with-item 
+            (assoc db :snake { :position [(- (snake-x db) 1), (snake-y db)]
+                               :points (:points (:snake db)) })))
         db)))
 
   (rf/reg-event-db
     :move-left
     (fn [db _]
       (if (> (snake-y db) 0)
-        (assoc db :snake { :position [(snake-x db), (- (snake-y db) 1)] :points db })
-                           
+        (cycle-points 
+          (collision-with-item 
+            (assoc db :snake { :position [(snake-x db), (- (snake-y db) 1)]
+                                             :points (:points (:snake db)) })))
         db)))
 
   (rf/reg-event-db
     :move-right
     (fn [db _]
       (if (< (snake-y db) (- (last (:board-size db)) 1))
-        (assoc db :snake { :position [(snake-x db), (+ 1 (snake-y db))] :points db })
+        (cycle-points 
+          (collision-with-item 
+            (assoc db :snake { :position [(snake-x db), (+ 1 (snake-y db))]
+                                             :points (:points (:snake db))})))
         db)))
 
   (rf/reg-sub
@@ -129,6 +154,11 @@
     :score-point-pos
     (fn [db _]
       (:score-point-pos db)))
+
+  (rf/reg-sub
+    :snake-parts-pos
+    (fn [db _]
+      (drop 1 (:points (:snake db)))))
   
   (rf/reg-sub
     :snake-pos
