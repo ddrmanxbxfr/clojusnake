@@ -8,8 +8,6 @@
 
 (enable-console-print!)
 
-(println "Reloading the app !")
-
 (def cell-style {:style {:display "table-cell" :position "relative"}})
 (def base-tile-style {:display "block" :height 50 :width 50 })
 (def background-tile-style (merge base-tile-style {:position "relative" :z-index -1}))
@@ -36,15 +34,16 @@
 (defn ui
   []
   [:div
-   [:h1 "A ClojureScript snake-game using reframe and reagent"]
+   [:h1 "Snake game powered by ClojureScript, Reframe and Reagent"]
    [:h2 "Made by ddrmanxbxfr as a clojurescript learning project"]
+
    [:h3
      "Score : "
      (with-out-str (pprint  (:score @re-frame.db/app-db)))
      (if (:game-running? @re-frame.db/app-db)
        " -- Running"
        " -- Game over ! Refresh to restart")]
-   (render-rows @(rf/subscribe [:board-size]))
+   (render-rows (:board-size @re-frame.db/app-db))
    ;[:pre (with-out-str (pprint (:position (:snake @re-frame.db/app-db))))]
    ;[:pre (with-out-str (pprint @(rf/subscribe [:snake-parts-pos])))]
    ])
@@ -59,9 +58,3 @@
     (js/document.getElementById "app")))
 
 (run)
-
-(defn on-js-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ; (swap! app-state update-in [:__figwheel_counter] inc)
-  )
