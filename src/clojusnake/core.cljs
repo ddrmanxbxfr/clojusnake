@@ -16,14 +16,14 @@
 (defn single-row [pos_x size_y]
   [:div {:key pos_x :style {:display "table-row"}}
    (doall (for [pos_y (range size_y)]
-     [:div (merge {:key [pos_x, pos_y]} cell-style)
-       [:img {:style background-tile-style :src "grass.png" }]
-       (if (= @(rf/subscribe [:score-point-pos]) [pos_x, pos_y])
-         [:img {:style worm-tile-style :src "apple.png" }])
-       (if (= @(rf/subscribe [:snake-pos]) [pos_x, pos_y])
-         [:img {:style worm-tile-style :src "snake_start.png" }])
-       (if (utils/in? @(rf/subscribe [:snake-parts-pos]) [pos_x, pos_y])
-         [:img {:style worm-tile-style :src "snake_middle.png" }])
+     [:div (merge {:key [pos_x pos_y]} cell-style)
+       [:img {:style background-tile-style :src "grass.png"}]
+       (if (= @(rf/subscribe [:score-point-pos]) [pos_x pos_y])
+         [:img {:style worm-tile-style :src "apple.png"}])
+       (if (= @(rf/subscribe [:snake-pos]) [pos_x pos_y])
+         [:img {:style worm-tile-style :src "snake_start.png"}])
+       (if (utils/in? @(rf/subscribe [:snake-parts-pos]) [pos_x pos_y])
+         [:img {:style worm-tile-style :src "snake_middle.png"}])
       ]))])
 
 (defn render-rows [board-size]
